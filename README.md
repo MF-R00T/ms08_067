@@ -1,31 +1,10 @@
-# MS08_067 Python Exploit Script - Updated 2018
+# MS08_067 Python Exploit Script - Updated 2023
 
-This is an updated version of the super old MS08-067 Python exploit script.  It implements some fixes to allow easy exploitation on a wider range of configurations.
-
-Cloned and edited from this repository:  
-https://github.com/jivoi/pentest/
+[andyacer](https://github.com/andyacer/ms08_067) did a fantastic job creating this repo, however his python code need some updating to work in a python3 enviroment, which can be found on this forked repo.
 
 ## Installation on Kali
 
-`git clone https://github.com/andyacer/ms08_067/`
-
-**You'll need to update Kali's Impacket version to 0_9_17**
-
-Here in 2018, Kali's package management is on an old version of Impacket.  Here's the steps on how to fix it:
-
-```
-git clone --branch impacket_0_9_17 --single-branch https://github.com/CoreSecurity/impacket/
-cd impacket
-pip install .
-```
-
-## Update Notes
-
-```diff
-+ Added support for selecting a target port at the command line.  It seemed that only 445 was previously supported.
-+ Changed library calls to correctly establish a NetBIOS session for SMB transport
-+ Changed shellcode handling to allow for variable length shellcode. Just cut and paste into this source file.
-```
+`git clone https://github.com/MF-R00T/ms08_067/`
 
 ## Generating Shellcode
 
